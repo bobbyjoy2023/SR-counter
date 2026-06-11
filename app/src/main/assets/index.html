@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#0A0A0B">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>IRON STREAK</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%230A0A0B'/><path d='M50 14 L74 30 V56 C74 72 62 82 50 88 C38 82 26 72 26 56 V30 Z' fill='none' stroke='%23E11D2E' stroke-width='7'/><path d='M50 32 V62 M38 47 H62' stroke='%23E11D2E' stroke-width='7' stroke-linecap='round'/></svg>">
+<style>
+:root{
+  --bg:#0A0A0B;
+  --surface:#141416;
+  --surface2:#1C1518;
+  --red:#E11D2E;
+  --red-bright:#FF4D5A;
+  --red-deep:#7A0E18;
+  --text:#F5F2F0;
+  --muted:#8A8A92;
+  --gold:#E8B84B;
+  --ring-track:#221B1D;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:'Inter',-apple-system,'Segoe UI',Roboto,sans-serif;
+  overflow-x:hidden;
+  min-height:100vh;
+  min-height:100dvh;
+  background-image:
+    radial-gradient(ellipse 120% 50% at 50% -10%, rgba(225,29,46,.13), transparent 60%),
+    radial-gradient(ellipse 80% 40% at 50% 110%, rgba(225,29,46,.06), transparent 60%);
+}
+.display{font-family:'Bebas Neue','Arial Narrow',Impact,sans-serif;letter-spacing:.04em}
+@font-face{
+  font-family:'Bebas Neue';
+  src:local('Bebas Neue');
+  font-display:swap;
+}
+
+/* ===== APP SHELL ===== */
+#app{max-width:480px;margin:0 auto;padding:max(20px,env(safe-area-inset-top)) 20px calc(40px + env(safe-area-inset-bottom));min-height:100dvh;display:flex;flex-direction:column}
+
+header{display:flex;align-items:center;justify-content:space-between;padding:6px 2px 18px}
+.brand{display:flex;align-items:center;gap:10px}
+.brand svg{width:30px;height:30px}
+.brand h1{font-size:22px;letter-spacing:.14em;font-weight:400}
+.brand h1 b{color:var(--red);font-weight:400}
+.streak-pill{font-size:11px;letter-spacing:.12em;color:var(--muted);border:1px solid #2A2A2E;border-radius:999px;padding:6px 12px;text-transform:uppercase}
+.streak-pill.active{color:var(--red-bright);border-color:var(--red-deep)}
+
+/* ===== DAILY FIRE (motivation on open) ===== */
+.daily-fire{
+  background:linear-gradient(135deg,var(--surface2),var(--surface));
+  border:1px solid #26191C;
+  border-left:3px solid var(--red);
+  border-radius:14px;
+  padding:16px 18px;
+  margin-bottom:22px;
+}
+.daily-fire .eyebrow{font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--red-bright);margin-bottom:8px}
+.daily-fire p{font-size:15px;line-height:1.55;color:var(--text);font-style:italic}
+
+/* ===== HERO RING ===== */
+.hero{display:flex;flex-direction:column;align-items:center;margin-bottom:8px}
+.ring-wrap{position:relative;width:min(78vw,300px);height:min(78vw,300px)}
+.ring-wrap svg{width:100%;height:100%;transform:rotate(-90deg)}
+.ring-track{stroke:var(--ring-track);fill:none}
+.ring-fill{stroke:url(#ringGrad);fill:none;stroke-linecap:round;transition:stroke-dashoffset .8s cubic-bezier(.22,1,.36,1)}
+.ring-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.day-num{font-size:clamp(64px,24vw,96px);line-height:.9;color:var(--text)}
+.day-num.lit{color:var(--red-bright);text-shadow:0 0 32px rgba(225,29,46,.5)}
+.day-label{font-size:12px;letter-spacing:.3em;text-transform:uppercase;color:var(--muted);margin-top:6px}
+.next-target{font-size:12px;color:var(--muted);margin-top:8px}
+.next-target b{color:var(--red-bright);font-weight:600}
+
+.live-clock{display:flex;gap:18px;margin:18px 0 6px}
+.lc-unit{text-align:center}
+.lc-unit .v{font-size:30px;color:var(--text)}
+.lc-unit .l{font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-top:2px}
+.lc-sep{font-size:26px;color:var(--red-deep);align-self:flex-start;line-height:1.2}
+
+/* ===== START PANEL ===== */
+.start-panel{background:var(--surface);border:1px solid #232327;border-radius:18px;padding:24px 20px;margin:10px 0 22px;text-align:center}
+.start-panel h2{font-size:30px;letter-spacing:.08em;margin-bottom:6px}
+.start-panel h2 span{color:var(--red)}
+.start-panel .sub{font-size:13px;color:var(--muted);line-height:1.5;margin-bottom:20px}
+.dt-row{display:flex;flex-direction:column;gap:10px;margin-bottom:18px;text-align:left}
+.dt-row label{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+.dt-row input{
+  background:var(--bg);border:1px solid #2E2E33;border-radius:10px;
+  color:var(--text);padding:13px 14px;font-size:15px;width:100%;
+  color-scheme:dark;font-family:inherit;
+}
+.dt-row input:focus{outline:2px solid var(--red);outline-offset:1px;border-color:transparent}
+
+.btn{
+  display:block;width:100%;border:none;border-radius:12px;cursor:pointer;
+  padding:16px;font-size:16px;letter-spacing:.18em;text-transform:uppercase;
+  font-family:'Bebas Neue','Arial Narrow',Impact,sans-serif;
+}
+.btn-primary{
+  background:linear-gradient(135deg,var(--red),#B5121F);color:#fff;
+  box-shadow:0 6px 24px rgba(225,29,46,.35);
+}
+.btn-primary:active{transform:scale(.98)}
+.btn-ghost{background:transparent;color:var(--muted);border:1px solid #2A2A2E;margin-top:10px;font-size:13px;padding:12px}
+.btn-ghost:active{color:var(--red-bright);border-color:var(--red-deep)}
+
+/* ===== REWARD STACK ===== */
+.section-title{font-size:13px;letter-spacing:.24em;text-transform:uppercase;color:var(--muted);margin:26px 0 14px;display:flex;align-items:center;gap:12px}
+.section-title::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,#2A1A1D,transparent)}
+.stack{display:flex;flex-direction:column-reverse;gap:0;align-items:center}
+.medal{
+  width:100%;max-width:360px;
+  background:linear-gradient(135deg,var(--surface2),var(--surface));
+  border:1px solid #2A1B1E;border-radius:14px;
+  padding:14px 16px;display:flex;align-items:center;gap:14px;
+  margin-top:-6px;position:relative;
+  transition:transform .3s, box-shadow .3s;
+}
+.medal.locked{opacity:.38;filter:grayscale(.7)}
+.medal.earned{border-color:var(--red-deep);box-shadow:0 4px 18px rgba(225,29,46,.18)}
+.medal.earned:active{transform:translateY(-3px)}
+.medal .badge{
+  width:46px;height:46px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Bebas Neue','Arial Narrow',Impact,sans-serif;font-size:18px;
+  background:radial-gradient(circle at 30% 30%, #2A2A2E, #161618);
+  border:2px solid #333;color:var(--muted);
+}
+.medal.earned .badge{
+  background:radial-gradient(circle at 30% 30%, var(--red-bright), var(--red-deep));
+  border-color:var(--red-bright);color:#fff;
+  box-shadow:0 0 16px rgba(225,29,46,.5);
+}
+.medal.earned.gold .badge{
+  background:radial-gradient(circle at 30% 30%, #F5D77B, #9C7414);
+  border-color:var(--gold);box-shadow:0 0 18px rgba(232,184,75,.5);
+}
+.medal .info{flex:1;min-width:0}
+.medal .info .t{font-size:15px;font-weight:600;letter-spacing:.02em}
+.medal .info .q{font-size:12px;color:var(--muted);line-height:1.45;margin-top:3px;display:none}
+.medal.earned .info .q{display:block}
+.medal .state{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);flex-shrink:0}
+.medal.earned .state{color:var(--red-bright)}
+.medal.earned.gold .state{color:var(--gold)}
+
+/* ===== CELEBRATION OVERLAY ===== */
+.overlay{
+  position:fixed;inset:0;background:rgba(6,6,7,.92);backdrop-filter:blur(8px);
+  display:none;align-items:center;justify-content:center;z-index:50;padding:28px;
+}
+.overlay.show{display:flex}
+.celebrate{
+  background:linear-gradient(160deg,#1A0C0F,#0E0E10);
+  border:1px solid var(--red-deep);border-radius:22px;
+  padding:38px 26px;max-width:380px;width:100%;text-align:center;
+  box-shadow:0 0 80px rgba(225,29,46,.3);
+  animation:popIn .5s cubic-bezier(.22,1.4,.36,1);
+}
+@keyframes popIn{from{transform:scale(.7);opacity:0}to{transform:scale(1);opacity:1}}
+.celebrate .big-badge{
+  width:96px;height:96px;border-radius:50%;margin:0 auto 20px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Bebas Neue','Arial Narrow',Impact,sans-serif;font-size:34px;color:#fff;
+  background:radial-gradient(circle at 30% 30%, var(--red-bright), var(--red-deep));
+  border:3px solid var(--red-bright);
+  box-shadow:0 0 40px rgba(225,29,46,.65);
+  animation:pulse 1.6s ease-in-out infinite;
+}
+@keyframes pulse{0%,100%{box-shadow:0 0 30px rgba(225,29,46,.5)}50%{box-shadow:0 0 60px rgba(225,29,46,.85)}}
+.celebrate h2{font-size:34px;letter-spacing:.08em;color:var(--red-bright);margin-bottom:4px}
+.celebrate .milestone-name{font-size:13px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:18px}
+.celebrate .quote{font-size:16px;line-height:1.6;font-style:italic;color:var(--text);margin-bottom:24px}
+@media (prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important}
+}
+.hidden{display:none!important}
+footer{margin-top:auto;padding-top:30px;text-align:center;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:#3A3A3F}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <header>
+    <div class="brand">
+      <svg viewBox="0 0 100 100"><path d="M50 8 L80 26 V56 C80 75 66 87 50 94 C34 87 20 75 20 56 V26 Z" fill="none" stroke="#E11D2E" stroke-width="6"/><path d="M50 30 V64 M36 47 H64" stroke="#E11D2E" stroke-width="6" stroke-linecap="round"/></svg>
+      <h1 class="display">IRON<b>STREAK</b></h1>
+    </div>
+    <div class="streak-pill" id="pill">No streak</div>
+  </header>
+
+  <!-- Daily motivation -->
+  <div class="daily-fire" id="dailyFire">
+    <div class="eyebrow">Today's Fire</div>
+    <p id="dailyQuote"></p>
+  </div>
+
+  <!-- Start panel (shown when no streak) -->
+  <div class="start-panel" id="startPanel">
+    <h2 class="display">FORGE YOUR <span>DISCIPLINE</span></h2>
+    <p class="sub">Set your start moment. The clock begins, the milestones await: 7 · 14 · 21 · 30 · 60 · 90 days.</p>
+    <div class="dt-row">
+      <label for="startDT">Start date &amp; time</label>
+      <input type="datetime-local" id="startDT">
+    </div>
+    <button class="btn btn-primary" id="startBtn">Start the Streak</button>
+  </div>
+
+  <!-- Hero (shown when streak running) -->
+  <div class="hero hidden" id="hero">
+    <div class="ring-wrap">
+      <svg viewBox="0 0 200 200">
+        <defs>
+          <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#FF4D5A"/>
+            <stop offset="100%" stop-color="#7A0E18"/>
+          </linearGradient>
+        </defs>
+        <circle class="ring-track" cx="100" cy="100" r="88" stroke-width="10"/>
+        <circle class="ring-fill" id="ringFill" cx="100" cy="100" r="88" stroke-width="10"
+                stroke-dasharray="552.9" stroke-dashoffset="552.9"/>
+      </svg>
+      <div class="ring-center">
+        <div class="day-num display" id="dayNum">0</div>
+        <div class="day-label" id="dayLabel">Days Strong</div>
+        <div class="next-target" id="nextTarget"></div>
+      </div>
+    </div>
+    <div class="live-clock">
+      <div class="lc-unit"><div class="v display" id="hh">00</div><div class="l">Hrs</div></div>
+      <div class="lc-sep display">:</div>
+      <div class="lc-unit"><div class="v display" id="mm">00</div><div class="l">Min</div></div>
+      <div class="lc-sep display">:</div>
+      <div class="lc-unit"><div class="v display" id="ss">00</div><div class="l">Sec</div></div>
+    </div>
+    <button class="btn btn-ghost" id="resetBtn" style="max-width:240px">Reset / Relapse</button>
+  </div>
+
+  <!-- Reward stack -->
+  <div id="stackSection" class="hidden">
+    <div class="section-title">Reward Stack</div>
+    <div class="stack" id="stack"></div>
+  </div>
+
+  <footer>Discipline is the strongest form of self-respect</footer>
+</div>
+
+<!-- Celebration overlay -->
+<div class="overlay" id="overlay">
+  <div class="celebrate">
+    <div class="big-badge display" id="cBadge">7</div>
+    <h2 class="display" id="cTitle">DAY 7</h2>
+    <div class="milestone-name" id="cName">Milestone Conquered</div>
+    <p class="quote" id="cQuote"></p>
+    <button class="btn btn-primary" id="cClose">Claim Reward</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  var KEY = 'ironstreak_v1';
+
+  var MILESTONES = [
+    {day:7,  name:'THE FIRST WALL',   quote:'"One week of saying no to impulse is one week of saying yes to yourself. The man who controls the small battles wins the war."'},
+    {day:14, name:'THE FORTNIGHT FORGE', quote:'"Two weeks in, the fog lifts. Your energy is no longer leaking — it is compounding. Keep stacking."'},
+    {day:21, name:'THE HABIT LINE',   quote:'"Twenty-one days — the old pattern is dying and a new man is being built in its place. You are no longer resisting; you are becoming."'},
+    {day:30, name:'THE IRON MONTH',   quote:'"A full month of mastery. Most men never see this summit. Look down at where you started — then look up. The mountain continues."'},
+    {day:60, name:'THE TRANSMUTATION',quote:'"Sixty days. The drive that once ruled you now fuels you — your training, your career, your mission. This is energy transmuted into power."'},
+    {day:90, name:'THE REBIRTH',      quote:'"Ninety days. Full reboot. You stand where few have the will to stand. Discipline is now your nature, not your effort. You are the proof."', gold:true}
+  ];
+
+  var DAILY = [
+    'Every urge you defeat is a deposit in the bank of who you are becoming.',
+    'Weak men obey their impulses. Strong men command them.',
+    'Your future self is watching this moment. Make him proud.',
+    'The energy you keep is the energy you build with.',
+    'Discipline today, dominance tomorrow.',
+    'You did not come this far to only come this far.',
+    'Comfort is the enemy. The streak is the weapon.',
+    'A man in control of himself fears nothing in the world.',
+    'The urge lasts minutes. The pride lasts forever.',
+    'Retain. Train. Build. Repeat.',
+    'Kings are crowned in the battles nobody sees.',
+    'Your focus sharpens every single day you hold the line.',
+    'Pain of discipline or pain of regret — you already chose.',
+    'The streak is not a number. It is your word to yourself, kept.'
+  ];
+
+  var $ = function(id){ return document.getElementById(id); };
+  var CIRC = 2 * Math.PI * 88;
+
+  function load(){
+    try{ return JSON.parse(localStorage.getItem(KEY)) || {start:null, celebrated:[]}; }
+    catch(e){ return {start:null, celebrated:[]}; }
+  }
+  function save(s){ localStorage.setItem(KEY, JSON.stringify(s)); }
+
+  var state = load();
+  var timer = null;
+  var celebrateQueue = [];
+
+  // Daily quote — rotates by date, deterministic
+  function showDaily(){
+    var d = new Date();
+    var idx = (d.getFullYear()*372 + (d.getMonth()+1)*31 + d.getDate()) % DAILY.length;
+    $('dailyQuote').textContent = DAILY[idx];
+  }
+
+  function daysSince(startMs, nowMs){
+    return Math.floor((nowMs - startMs) / 86400000);
+  }
+
+  function nextMilestone(days){
+    for(var i=0;i<MILESTONES.length;i++){
+      if(MILESTONES[i].day > days) return MILESTONES[i];
+    }
+    return null;
+  }
+  function prevMilestoneDay(days){
+    var p = 0;
+    for(var i=0;i<MILESTONES.length;i++){
+      if(MILESTONES[i].day <= days) p = MILESTONES[i].day;
+    }
+    return p;
+  }
+
+  function renderStack(days){
+    var html = '';
+    for(var i=0;i<MILESTONES.length;i++){
+      var m = MILESTONES[i];
+      var earned = days >= m.day;
+      html += '<div class="medal '+(earned?'earned':'locked')+(m.gold?' gold':'')+'">'
+        + '<div class="badge">'+m.day+'</div>'
+        + '<div class="info"><div class="t">'+m.name+'</div>'
+        + '<div class="q">'+m.quote+'</div></div>'
+        + '<div class="state">'+(earned?'Earned':'Day '+m.day)+'</div>'
+        + '</div>';
+    }
+    $('stack').innerHTML = html;
+  }
+
+  function showCelebration(m){
+    $('cBadge').textContent = m.day;
+    $('cBadge').style.background = m.gold
+      ? 'radial-gradient(circle at 30% 30%, #F5D77B, #9C7414)'
+      : 'radial-gradient(circle at 30% 30%, #FF4D5A, #7A0E18)';
+    $('cBadge').style.borderColor = m.gold ? '#E8B84B' : '#FF4D5A';
+    $('cTitle').textContent = 'DAY ' + m.day + ' CONQUERED';
+    $('cName').textContent = m.name;
+    $('cQuote').textContent = m.quote;
+    $('overlay').classList.add('show');
+    if(navigator.vibrate) navigator.vibrate([60,40,60,40,120]);
+  }
+
+  $('cClose').addEventListener('click', function(){
+    $('overlay').classList.remove('show');
+    if(celebrateQueue.length){
+      setTimeout(function(){ showCelebration(celebrateQueue.shift()); }, 350);
+    }
+  });
+
+  function checkMilestones(days){
+    var changed = false;
+    for(var i=0;i<MILESTONES.length;i++){
+      var m = MILESTONES[i];
+      if(days >= m.day && state.celebrated.indexOf(m.day) === -1){
+        state.celebrated.push(m.day);
+        celebrateQueue.push(m);
+        changed = true;
+      }
+    }
+    if(changed){
+      save(state);
+      renderStack(days);
+      if(!$('overlay').classList.contains('show')){
+        showCelebration(celebrateQueue.shift());
+      }
+    }
+  }
+
+  function tick(){
+    var now = Date.now();
+    var elapsed = now - state.start;
+    if(elapsed < 0) elapsed = 0;
+    var days = Math.floor(elapsed / 86400000);
+    var hrs  = Math.floor(elapsed / 3600000) % 24;
+    var mins = Math.floor(elapsed / 60000) % 60;
+    var secs = Math.floor(elapsed / 1000) % 60;
+
+    var dn = $('dayNum');
+    dn.textContent = days;
+    dn.className = 'day-num display' + (days >= 7 ? ' lit' : '');
+    $('dayLabel').textContent = days === 1 ? 'Day Strong' : 'Days Strong';
+    $('hh').textContent = String(hrs).padStart(2,'0');
+    $('mm').textContent = String(mins).padStart(2,'0');
+    $('ss').textContent = String(secs).padStart(2,'0');
+
+    var next = nextMilestone(days);
+    if(next){
+      var base = prevMilestoneDay(days);
+      var span = next.day - base;
+      var progDays = (elapsed/86400000) - base;
+      var pct = Math.min(Math.max(progDays/span, 0), 1);
+      $('ringFill').style.strokeDashoffset = CIRC * (1 - pct);
+      var left = next.day - days;
+      $('nextTarget').innerHTML = '<b>' + left + (left===1?' day':' days') + '</b> to Day ' + next.day;
+    } else {
+      $('ringFill').style.strokeDashoffset = 0;
+      $('nextTarget').innerHTML = '<b>Legend.</b> Beyond Day 90.';
+    }
+
+    $('pill').textContent = 'Day ' + days;
+    $('pill').classList.add('active');
+
+    checkMilestones(days);
+  }
+
+  function startUI(){
+    $('startPanel').classList.add('hidden');
+    $('hero').classList.remove('hidden');
+    $('stackSection').classList.remove('hidden');
+    renderStack(daysSince(state.start, Date.now()));
+    tick();
+    timer = setInterval(tick, 1000);
+  }
+
+  function stopUI(){
+    clearInterval(timer);
+    $('hero').classList.add('hidden');
+    $('stackSection').classList.add('hidden');
+    $('startPanel').classList.remove('hidden');
+    $('pill').textContent = 'No streak';
+    $('pill').classList.remove('active');
+    // default datetime = now
+    $('startDT').value = localDT(new Date());
+  }
+
+  function localDT(d){
+    var p = function(n){return String(n).padStart(2,'0');};
+    return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+'T'+p(d.getHours())+':'+p(d.getMinutes());
+  }
+  function d_offset(){ return 0; }
+
+  $('startBtn').addEventListener('click', function(){
+    var v = $('startDT').value;
+    var t = v ? new Date(v).getTime() : Date.now();
+    if(isNaN(t)) t = Date.now();
+    if(t > Date.now()) t = Date.now();
+    state.start = t;
+    state.celebrated = [];
+    // pre-mark milestones already passed if backdated? No — celebrate them on first tick (stacked).
+    save(state);
+    startUI();
+  });
+
+  $('resetBtn').addEventListener('click', function(){
+    if(confirm('Reset the streak? Your current progress will be cleared. The comeback starts immediately.')){
+      state = {start:null, celebrated:[]};
+      save(state);
+      stopUI();
+    }
+  });
+
+  // ===== INIT =====
+  showDaily();
+  if(state.start){
+    startUI();
+  } else {
+    $('startDT').value = localDT(new Date());
+  }
+
+  // keep clock honest when returning to the app
+  document.addEventListener('visibilitychange', function(){
+    if(!document.hidden && state.start) tick();
+  });
+})();
+</script>
+</body>
+</html>
